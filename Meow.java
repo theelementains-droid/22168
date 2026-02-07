@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -36,7 +37,7 @@ public class Meow extends LinearOpMode {
     private DcMotor m2;
     private DcMotor m3;
     private DcMotor m4;
-    private DcMotor turret;
+    private DcMotorEx turret;
     private DcMotor spin;
     private DcMotor l1;
     private DcMotor l2;
@@ -59,6 +60,10 @@ public class Meow extends LinearOpMode {
         c1 = hardwareMap.get(RevColorSensorV3.class, "c1");
         c2 = hardwareMap.get(RevColorSensorV3.class, "c2");
         c3 = hardwareMap.get(RevColorSensorV3.class, "c3");
+        turret = hardwareMap.get(DcMotorEx.class, "turret");
+        spin = hardwareMap.get(DcMotor.class, "spin");
+        l1 = hardwareMap.get(DcMotor.class, "l1");
+        l2 = hardwareMap.get(DcMotor.class, "l2");
         s1 = hardwareMap.get(Servo.class, "s1");
         s2 = hardwareMap.get(Servo.class, "s2");
         s3 = hardwareMap.get(Servo.class, "s3");
@@ -83,10 +88,11 @@ public class Meow extends LinearOpMode {
             timer1 -= 1;
             timer2 -= 1;
             timer3 -= 1;
-            if(gamepad2.right_bumper){
+            if(gamepad2.a)
+            if(gamepad2.rightBumperWasPressed()){
                 outtake = !outtake;
             }
-            if(gamepad2.left_bumper){
+            if(gamepad2.leftBumperWasPressed()){
                 outtake = !outtake;
             }
             if(gamepad2.x){
@@ -110,6 +116,12 @@ public class Meow extends LinearOpMode {
             if(timer3<=0){
                 s3.setPosition(0.01);
             }
+            if(outtake){
+                spin.setPower(0.4);
+            }else{
+                spin.setPower(0);
+            }
+            
             
             }
         }
