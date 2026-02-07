@@ -69,6 +69,9 @@ public class Meow extends LinearOpMode {
         s3 = hardwareMap.get(Servo.class, "s3");
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+        turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
@@ -79,17 +82,44 @@ public class Meow extends LinearOpMode {
         boolean outtake = false;
         boolean intake = false;
         double spinSpeed = -1;
+        double turretangle = 0;
+        c1.setGain(10);
+        c2.setGain(10);
+        c3.setGain(10);
+        
         while (opModeIsActive()) {
             telemetry.addData("Status", "Running");
-            telemetry.update();
             m1.setPower(-gamepad1.right_stick_x+gamepad1.left_stick_x+gamepad1.left_stick_y);
             m2.setPower(-gamepad1.right_stick_x-gamepad1.left_stick_x+gamepad1.left_stick_y);
             m3.setPower(-gamepad1.right_stick_x+gamepad1.left_stick_x-gamepad1.left_stick_y);
             m4.setPower(-gamepad1.right_stick_x-gamepad1.left_stick_x-gamepad1.left_stick_y);
-            timer1 -= 1;
-            timer2 -= 1;
-            timer3 -= 1;
-            //if(gamepad2.a)
+            timer1 -= 25;
+            timer2 -= 25;
+            timer3 -= 25;
+            turretangle += 15.*gamepad2.left_stick_x;
+            if(turretangle>1012){
+                turretangle=1012;
+            }
+            if(turretangle<-2297){
+                turretangle=-2297;
+            }
+            if(gamepad2.a){
+                turretangle = 0;
+            }
+            
+            if(gamepad2.dpadDownWasPressed()){
+                intake = !intake;
+            }
+            if(intake){
+                l1.setPower(0.7);
+                l2.setPower(-0.7);
+            }else{
+                l1.setPower(0);
+                l2.setPower(0);
+            }
+            turret.setPower(1);
+            turret.setTargetPosition((int)Math.round(turretangle));
+            
             if(gamepad2.rightBumperWasPressed()){
                 outtake = !outtake;
                 spin.setDirection(DcMotor.Direction.FORWARD);
@@ -127,8 +157,19 @@ public class Meow extends LinearOpMode {
             }else{
                 spin.setPower(0);
             }
-            telemetry.addData("r|g|b",""+c1.getNormalizedColors().red);
+            telemetry.addData("rot",turret.getCurrentPosition() );
             telemetry.update();
+            if(c1.green()>=400){
+                telemetry.addData("b:","green");
+            }else{
+                telemetry.addData("b:","purple");
+            }
+            
+            if(c3.green()>=400){
+                telemetry.addData("y:","green");
+            }else{
+                telemetry.addData("y:","purple");
+            }
             
             }
         }
