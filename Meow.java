@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.Blinker;
@@ -11,6 +12,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import android.graphics.Color;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+
 
 /**
  * This file contains a minimal example of a Linear "OpMode". An OpMode is a 'program' that runs
@@ -30,16 +36,22 @@ public class Meow extends LinearOpMode {
     private DcMotor m2;
     private DcMotor m3;
     private DcMotor m4;
+    private DcMotor turret;
+    private DcMotor spin;
+    private DcMotor l1;
+    private DcMotor l2;
     private RevColorSensorV3 c1;
     private RevColorSensorV3 c2;
     private RevColorSensorV3 c3;
     private Servo s1;
     private Servo s2;
     private Servo s3;
+    private GoBildaPinpointDriver pinpoint;
     
     @Override
     public void runOpMode() {
         control_Hub = hardwareMap.get(Blinker.class, "Control Hub");
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         m1 = hardwareMap.get(DcMotor.class, "m1");
         m2 = hardwareMap.get(DcMotor.class, "m2");
         m3 = hardwareMap.get(DcMotor.class, "m3");
@@ -59,6 +71,8 @@ public class Meow extends LinearOpMode {
         double timer1 = 0;
         double timer2 = 0;
         double timer3 = 0;
+        boolean outtake = false;
+        boolean intake = false;
         while (opModeIsActive()) {
             telemetry.addData("Status", "Running");
             telemetry.update();
@@ -69,6 +83,12 @@ public class Meow extends LinearOpMode {
             timer1 -= 1;
             timer2 -= 1;
             timer3 -= 1;
+            if(gamepad2.right_bumper){
+                outtake = !outtake;
+            }
+            if(gamepad2.left_bumper){
+                outtake = !outtake;
+            }
             if(gamepad2.x){
                 timer1 = 1000;
                 s1.setPosition(0.35);
