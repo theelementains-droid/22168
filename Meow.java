@@ -78,6 +78,7 @@ public class Meow extends LinearOpMode {
         double timer3 = 0;
         boolean outtake = false;
         boolean intake = false;
+        double spinSpeed = -1;
         while (opModeIsActive()) {
             telemetry.addData("Status", "Running");
             telemetry.update();
@@ -88,12 +89,17 @@ public class Meow extends LinearOpMode {
             timer1 -= 1;
             timer2 -= 1;
             timer3 -= 1;
-            if(gamepad2.a)
+            //if(gamepad2.a)
             if(gamepad2.rightBumperWasPressed()){
                 outtake = !outtake;
+                spin.setDirection(DcMotor.Direction.FORWARD);
+                spinSpeed = -1;
             }
             if(gamepad2.leftBumperWasPressed()){
                 outtake = !outtake;
+                spin.setDirection(DcMotor.Direction.REVERSE);
+                spinSpeed = -0.4;
+                
             }
             if(gamepad2.x){
                 timer1 = 1000;
@@ -117,7 +123,7 @@ public class Meow extends LinearOpMode {
                 s3.setPosition(0.01);
             }
             if(outtake){
-                spin.setPower(0.4);
+                spin.setPower(spinSpeed);
             }else{
                 spin.setPower(0);
             }
