@@ -87,6 +87,21 @@ public class Shoot_Then_Strafe_Red extends LinearOpMode {
         setPow(-0.4);
         sleep(1500);
         setPow(0);
-
+        spin.setPower(-1);
+        sleep(500);
+        s1.setPosition(0.35);
+        sleep(1500);
+        s1.setPosition(0.01);
+        sleep(1500);
+        
+        s1.setPosition(0.55);
+        sleep(1500);
+        s1.setPosition(0.98);
+        sleep(1500);
+        
+        s1.setPosition(0.35);
+        sleep(1500);
+        s1.setPosition(0.01);
+        sleep(1500);
     }
 }
