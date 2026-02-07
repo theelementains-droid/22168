@@ -127,7 +127,8 @@ public class Meow extends LinearOpMode {
             }else{
                 spin.setPower(0);
             }
-            
+            telemetry.addData("r|g|b",""+c1.getNormalizedColors().red);
+            telemetry.update();
             
             }
         }
