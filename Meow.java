@@ -33,6 +33,9 @@ public class Meow extends LinearOpMode {
     private RevColorSensorV3 c1;
     private RevColorSensorV3 c2;
     private RevColorSensorV3 c3;
+    private Servo s1;
+    private Servo s2;
+    private Servo s3;
     
     @Override
     public void runOpMode() {
@@ -44,6 +47,9 @@ public class Meow extends LinearOpMode {
         c1 = hardwareMap.get(RevColorSensorV3.class, "c1");
         c2 = hardwareMap.get(RevColorSensorV3.class, "c2");
         c3 = hardwareMap.get(RevColorSensorV3.class, "c3");
+        s1 = hardwareMap.get(Servo.class, "s1");
+        s2 = hardwareMap.get(Servo.class, "s2");
+        s3 = hardwareMap.get(Servo.class, "s3");
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         // Wait for the game to start (driver presses PLAY)
@@ -60,17 +66,20 @@ public class Meow extends LinearOpMode {
             m2.setPower(-gamepad1.right_stick_x-gamepad1.left_stick_x+gamepad1.left_stick_y);
             m3.setPower(-gamepad1.right_stick_x+gamepad1.left_stick_x-gamepad1.left_stick_y);
             m4.setPower(-gamepad1.right_stick_x-gamepad1.left_stick_x-gamepad1.left_stick_y);
-            timer1 -= 50;
-            timer2 -= 50;
-            timer3 -= 50;
-            if(gamepad2.xWasPressed()){
+            timer1 -= 1;
+            timer2 -= 1;
+            timer3 -= 1;
+            if(gamepad2.x){
                 timer1 = 1000;
+                s1.setPosition(0.35);
             }
-            if(gamepad2.yWasPressed()){
+            if(gamepad2.y){
                 timer2 = 1000;
+                s2.setPosition(0.55);
             }
-            if(gamepad2.bWasPressed()){
+            if(gamepad2.b){
                 timer3 = 1000;
+                s3.setPosition(0.35);
             }
             if(timer1<=0){
                 s1.setPosition(0.01);
@@ -79,7 +88,7 @@ public class Meow extends LinearOpMode {
                 s2.setPosition(0.98);
             }
             if(timer3<=0){
-                s3.setPosition(0.98);
+                s3.setPosition(0.01);
             }
             
             }
