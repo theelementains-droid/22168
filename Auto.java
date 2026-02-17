@@ -36,7 +36,7 @@ public class AutoJava extends LinearOpMode {
             frontLeftDrive.setPower(.6);
             frontRightDrive.setPower(.6);
 
-    /*      backLeftDrive.setPower(1.6);
+            backLeftDrive.setPower(1.6);
             backRightDrive.setPower(1.6);
             frontLeftDrive.setPower(1.6);
             frontRightDrive.setPower(1.6);
@@ -67,6 +67,6 @@ public class AutoJava extends LinearOpMode {
             frontRightDrive.setPower(0);
             intake.setPower(1);
             sleep(4500);
-        */
+    
     }
 }
