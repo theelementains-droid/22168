@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import java.util.concurrent.TimeUnit;
+import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
@@ -17,6 +20,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+import com.qualcomm.robotcore.util.Range;
 
 
 /**
@@ -48,6 +52,8 @@ public class Meow extends LinearOpMode {
     private Servo s2;
     private Servo s3;
     private GoBildaPinpointDriver pinpoint;
+    private final int READ_PERIOD = 1;
+    private HuskyLens huskyLens;
     
     @Override
     public void runOpMode() {
@@ -67,13 +73,25 @@ public class Meow extends LinearOpMode {
         s1 = hardwareMap.get(Servo.class, "s1");
         s2 = hardwareMap.get(Servo.class, "s2");
         s3 = hardwareMap.get(Servo.class, "s3");
+        huskyLens = hardwareMap.get(HuskyLens.class, "ai");
+        Deadline rateLimit = new Deadline(READ_PERIOD, TimeUnit.SECONDS);
+        rateLimit.expire();
+        if (!huskyLens.knock()) {
+            telemetry.addData(">>", "Problem communicating with " + huskyLens.getDeviceName());
+        } else {
+            telemetry.addData(">>", "Press start to continue");
+        }
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);
+
+        telemetry.update();
+        waitForStart();
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
+        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // run until the end of the match (driver presses STOP)
         double timer1 = 0;
@@ -83,6 +101,15 @@ public class Meow extends LinearOpMode {
         boolean intake = false;
         double spinSpeed = -1;
         double turretangle = 0;
+        double bearing = 0;
+        double goalX = 0;
+        double lastError = 0;
+        double angletol = 0.2;
+        double kP = 0.0001;
+        double kD = 0.0000;
+        final double Mpow = 0.6;
+        double power = 0;
+        final ElapsedTime timer = new ElapsedTime();
         c1.setGain(10);
         c2.setGain(10);
         c3.setGain(10);
@@ -96,16 +123,7 @@ public class Meow extends LinearOpMode {
             timer1 -= 25;
             timer2 -= 25;
             timer3 -= 25;
-            turretangle += 15.*gamepad2.left_stick_x;
-            if(turretangle>1012){
-                turretangle=1012;
-            }
-            if(turretangle<-2297){
-                turretangle=-2297;
-            }
-            if(gamepad2.a){
-                turretangle = 0;
-            }
+
             
             if(gamepad2.dpadDownWasPressed()){
                 intake = !intake;
@@ -117,8 +135,59 @@ public class Meow extends LinearOpMode {
                 l1.setPower(0);
                 l2.setPower(0);
             }
-            turret.setPower(1);
-            turret.setTargetPosition((int)Math.round(turretangle));
+            HuskyLens.Block[] blocks = huskyLens.blocks();
+            telemetry.addData("Block count", blocks.length);
+
+            for (int i = 0; i < blocks.length; i++) {
+                telemetry.addData("Block", blocks[i].toString());
+                /*
+                 * Here inside the FOR loop, you could save or evaluate specific info for the currently recognized Bounding Box:
+                 * - blocks[i].width and blocks[i].height   (size of box, in pixels)
+                 * - blocks[i].left and blocks[i].top       (edges of box)
+                 * - blocks[i].x and blocks[i].y            (center location)
+                 * - blocks[i].id                           (Color ID)
+                 *
+                 * These values have Java type int (integer).
+                 */
+                 bearing = ((double)(blocks[i].x-160))*0.1875;
+                telemetry.addData("bar",bearing);
+                 telemetry.update();
+            }
+             if(blocks.length<1){
+                 bearing = 0;
+             }
+
+            //turret.setPower(1);
+            double dt = timer.seconds();
+            double error = goalX-bearing;
+            double pT = error *kP;
+            
+            double dT = 0;
+
+            if(dt > 0){
+                dT = ((error-lastError)/dt)*kD;
+            }
+            
+            //turretangle += 15.*gamepad2.left_stick_x - 15*(pT+dT);
+            //turret.setPower(gamepad2.left_stick_x);
+            if(Math.abs(error)<angletol){
+                power = 0;
+            }else{
+                power = Range.clip(pT+dT,-Mpow,Mpow);
+            }
+
+            if(turret.getCurrentPosition()>1012){
+                turretangle=982;
+                turret.setPower(-Mpow);
+            }
+            if(turret.getCurrentPosition()<-2297){
+                turretangle=-2217;
+                turret.setPower(Mpow);
+            }
+            turret.setPower(-power*100+gamepad2.left_stick_x);
+            if(gamepad2.a){
+                turretangle = 0;
+            }
             
             if(gamepad2.rightBumperWasPressed()){
                 outtake = !outtake;
@@ -133,24 +202,24 @@ public class Meow extends LinearOpMode {
             }
             if(gamepad2.x){
                 timer1 = 1000;
-                s1.setPosition(0.35);
+                s1.setPosition(0.65);
             }
             if(gamepad2.y){
                 timer2 = 1000;
-                s2.setPosition(0.55);
+                s2.setPosition(0.35);
             }
             if(gamepad2.b){
                 timer3 = 1000;
-                s3.setPosition(0.35);
+                s3.setPosition(0.65);
             }
             if(timer1<=0){
-                s1.setPosition(0.01);
+                s1.setPosition(0.99);
             }
             if(timer2<=0){
-                s2.setPosition(0.98);
+                s2.setPosition(0.01);
             }
             if(timer3<=0){
-                s3.setPosition(0.01);
+                s3.setPosition(0.99);
             }
             if(outtake){
                 spin.setPower(spinSpeed);
@@ -158,6 +227,7 @@ public class Meow extends LinearOpMode {
                 spin.setPower(0);
             }
             telemetry.addData("rot",turret.getCurrentPosition() );
+            
             telemetry.update();
             if(c1.green()>=400){
                 telemetry.addData("b:","green");
