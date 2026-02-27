@@ -107,6 +107,7 @@ public class Meow extends LinearOpMode {
         double angletol = 0.2;
         double kP = 0.0001;
         double kD = 0.0000;
+        boolean autoAim = true;
         final double Mpow = 0.6;
         double power = 0;
         final ElapsedTime timer = new ElapsedTime();
@@ -149,9 +150,11 @@ public class Meow extends LinearOpMode {
                  *
                  * These values have Java type int (integer).
                  */
+                if((blocks[i]==0)||(blocks[i]==1)){
                  bearing = ((double)(blocks[i].x-160))*0.1875;
                 telemetry.addData("bar",bearing);
                  telemetry.update();
+                }
             }
              if(blocks.length<1){
                  bearing = 0;
@@ -170,7 +173,7 @@ public class Meow extends LinearOpMode {
             
             //turretangle += 15.*gamepad2.left_stick_x - 15*(pT+dT);
             //turret.setPower(gamepad2.left_stick_x);
-            if(Math.abs(error)<angletol){
+            if((Math.abs(error)<angletol)||autoAim){
                 power = 0;
             }else{
                 power = Range.clip(pT+dT,-Mpow,Mpow);
@@ -229,6 +232,9 @@ public class Meow extends LinearOpMode {
             telemetry.addData("rot",turret.getCurrentPosition() );
             
             telemetry.update();
+            if(gamepad2.dpadUpWasPressed(){
+                autoAim = !autoAim;
+            }
             if(c1.green()>=400){
                 telemetry.addData("b:","green");
             }else{
