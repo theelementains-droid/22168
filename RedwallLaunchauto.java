@@ -33,11 +33,12 @@ public class RedwallLaunchauto extends LinearOpMode {
     private Servo s1;
     private Servo s2;
     private Servo s3;
+    // p1 controlls back and forth while p2 controls strafing and p3 controls turning
     public void setPow(double p1 double p2 double p3){
-            m1.setPower(-p1+gamepad1.left_stick_x+gamepad1.left_stick_y);
-            m2.setPower(-p1-gamepad1.left_stick_x+gamepad1.left_stick_y);
-            m3.setPower(-p1+gamepad1.left_stick_x-gamepad1.left_stick_y);
-            m4.setPower(-p1-gamepad1.left_stick_x-gamepad1.left_stick_y);
+            m1.setPower(-p3+p2+p1);
+            m2.setPower(-p3-p2+p1);
+            m3.setPower(-p3+p2-p1);
+            m4.setPower(-p3-p2-p1);
     }
     @Override
     public void runOpMode() {
