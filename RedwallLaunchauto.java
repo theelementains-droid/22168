@@ -73,9 +73,22 @@ public class RedwallLaunchauto extends LinearOpMode {
         setPow(0.6,0.,0.);
         sleep(1500);
         setPow(0.,0.,0.);
-        spin.setPower(spin);
+        spin.setPower(spinSpeed);
         sleep(3500);
+        //Launch 1
         s1.setPosition(0.65);
         sleep(1000);
         s1.setPosition(0.99);
+        //Launch 2
+        sleep(500)
+        s2.setPosition(0.65);
+        sleep(1000);
+        s2.setPosition(0.99);
+        //Launch 3
+        sleep(500);
+        s3.setPosition(0.65);
+        sleep(1000);
+        s3.setPosition(0.99);
+        spin.setPower(0);
+        setPow(0,.6,0);
     }
